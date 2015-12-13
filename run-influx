@@ -1,0 +1,13 @@
+#!/bin/sh
+
+sed -i "s/localhost/`awk 'NR==1 {print $1}' /etc/hosts`/g" ${CONFIG_FILE}
+
+if [ -n "${CONSUL_JOIN}" ]; then
+  /bin/consul agent -config-dir /etc/consul -retry-join ${CONSUL_JOIN} &
+fi
+
+if [ -n "${INFLUX_JOIN}" ]; then
+  exec influxd -config ${CONFIG_FILE} -join ${INFLUX_JOIN}
+else
+  exec influxd -config ${CONFIG_FILE}
+fi
